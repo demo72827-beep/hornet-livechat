@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HornetChat — Agent dashboard</title>
+<script src="./firebase-config.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<style>
+:root{--brand:#057DE2;--ink:#101E46;--bg:#F2F5F9;--line:#E3E8F0;}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:system-ui,-apple-system,'Segoe UI',sans-serif;background:var(--bg);height:100vh;overflow:hidden;}
+.hidden{display:none !important;}
+
+/* login */
+#login{height:100vh;display:flex;align-items:center;justify-content:center;background:var(--ink);}
+.login_card{background:#fff;border-radius:16px;padding:38px 34px;width:340px;box-shadow:0 16px 48px rgba(0,0,0,.3);}
+.login_card h1{font-size:20px;margin-bottom:4px;color:var(--ink);}
+.login_card p{font-size:13px;color:#667;margin-bottom:22px;}
+.login_card input{width:100%;padding:12px 14px;border:1.5px solid #ddd;border-radius:10px;font-size:14px;margin-bottom:12px;outline:none;}
+.login_card input:focus{border-color:var(--brand);}
+.login_card button{width:100%;padding:12px;background:var(--brand);color:#fff;border:none;border-radius:10px;font-size:15px;font-weight:600;cursor:pointer;}
+#login_err{color:#C0392B;font-size:12.5px;margin-top:10px;display:none;}
+
+/* app */
+#app{display:flex;height:100vh;}
+#sidebar{width:320px;background:#fff;border-right:1px solid var(--line);display:flex;flex-direction:column;flex-shrink:0;}
+#side_head{padding:16px 18px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;}
+#side_head b{font-size:16px;color:var(--ink);}
+#logout{font-size:12px;color:#889;cursor:pointer;background:none;border:none;}
+#convs{flex:1;overflow-y:auto;}
+.conv{padding:14px 18px;border-bottom:1px solid var(--line);cursor:pointer;display:flex;gap:12px;align-items:center;}
+.conv:hover{background:#F7FAFD;}
+.conv.active{background:#EAF3FC;}
+.avatar{width:40px;height:40px;border-radius:50%;background:var(--brand);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:15px;flex-shrink:0;}
+.conv_mid{flex:1;min-width:0;}
+.conv_name{font-weight:600;font-size:14.5px;color:var(--ink);}
+.conv_last{font-size:12.5px;color:#788;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.conv_right{display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0;}
+.conv_time{font-size:11px;color:#99a;}
+.unread{background:#E24B4A;color:#fff;font-size:11px;font-weight:700;min-width:19px;height:19px;border-radius:10px;text-align:center;line-height:19px;padding:0 5px;}
+
+#main{flex:1;display:flex;flex-direction:column;min-width:0;}
+#chat_head{background:#fff;border-bottom:1px solid var(--line);padding:14px 22px;flex-shrink:0;}
+#chat_head b{font-size:15.5px;color:var(--ink);display:block;}
+#chat_head span{font-size:12px;color:#788;}
+#msgs{flex:1;overflow-y:auto;padding:20px;display:flex;flex-direction:column;gap:8px;}
+.m{max-width:65%;padding:10px 14px;border-radius:14px;font-size:14px;line-height:1.45;white-space:pre-wrap;word-break:break-word;}
+.m_agent{align-self:flex-end;background:var(--brand);color:#fff;border-bottom-right-radius:4px;}
+.m_visitor{align-self:flex-start;background:#fff;color:#1a1a1a;box-shadow:0 1px 2px rgba(0,0,0,.08);border-bottom-left-radius:4px;}
+.m_time{font-size:10.5px;opacity:.65;margin-top:3px;text-align:right;}
+#composer{display:flex;gap:10px;padding:14px 20px;background:#fff;border-top:1px solid var(--line);flex-shrink:0;}
+#reply{flex:1;border:1.5px solid #ddd;border-radius:22px;padding:11px 16px;font-size:14px;outline:none;font-family:inherit;}
+#reply:focus{border-color:var(--brand);}
+#send{width:44px;height:44px;border-radius:50%;border:none;background:var(--brand);color:#fff;font-size:16px;cursor:pointer;flex-shrink:0;}
+#empty{flex:1;display:flex;align-items:center;justify-content:center;color:#99a;font-size:14.5px;}
+@media(max-width:760px){#sidebar{width:100%;}#main{display:none;}
+body.chat_open #sidebar{display:none;}body.chat_open #main{display:flex;}}
+#back{display:none;background:none;border:none;font-size:18px;cursor:pointer;margin-right:10px;color:var(--ink);}
+@media(max-width:760px){#back{display:inline;}}
+</style>
+</head>
+<body>
+
+<div id="login">
+  <div class="login_card">
+    <h1>Agent login</h1>
+    <p>HornetChat dashboard — sirf team ke liye</p>
+    <input id="l_email" type="email" placeholder="Email" autocomplete="username">
+    <input id="l_pass" type="password" placeholder="Password" autocomplete="current-password">
+    <button id="l_btn">Sign in</button>
+    <div id="login_err"></div>
+  </div>
+</div>
+
+<div id="app" class="hidden">
+  <div id="sidebar">
+    <div id="side_head"><b>Inbox</b><button id="logout">Logout</button></div>
+    <div id="convs"></div>
+  </div>
+  <div id="main">
+    <div id="chat_head"><div style="display:flex;align-items:center;"><button id="back">←</button><div><b id="ch_name">—</b><span id="ch_meta"></span></div></div></div>
+    <div id="msgs"><div id="empty">Left se conversation select karo</div></div>
+    <div id="composer" class="hidden">
+      <input id="reply" placeholder="Reply likho…" maxlength="1000">
+      <button id="send">➤</button>
+    </div>
+  </div>
+</div>
+
+<script>
+firebase.initializeApp(window.HORNET_FIREBASE_CONFIG);
+var db = firebase.firestore();
+var auth = firebase.auth();
+
+var $ = function(id){ return document.getElementById(id); };
+var activeConv = null, msgUnsub = null, convUnsub = null;
+
+auth.onAuthStateChanged(function(u){
+  var loggedIn = u && !u.isAnonymous;
+  $("login").classList.toggle("hidden", loggedIn);
+  $("app").classList.toggle("hidden", !loggedIn);
+  if (loggedIn) listen(); else { if(convUnsub) convUnsub(); if(msgUnsub) msgUnsub(); }
+});
+
+$("l_btn").onclick = doLogin;
+$("l_pass").addEventListener("keydown", function(e){ if(e.key==="Enter") doLogin(); });
+function doLogin(){
+  auth.signInWithEmailAndPassword($("l_email").value.trim(), $("l_pass").value)
+    .catch(function(e){
+      var el = $("login_err");
+      el.textContent = "Login failed: " + e.message;
+      el.style.display = "block";
+    });
+}
+$("logout").onclick = function(){ auth.signOut(); location.reload(); };
+$("back").onclick = function(){ document.body.classList.remove("chat_open"); };
+
+function timeAgo(ts){
+  if(!ts) return "";
+  var s = (Date.now() - ts.toDate().getTime())/1000;
+  if(s<60) return "now";
+  if(s<3600) return Math.floor(s/60)+"m";
+  if(s<86400) return Math.floor(s/3600)+"h";
+  return Math.floor(s/86400)+"d";
+}
+function esc(t){ var d=document.createElement("div"); d.textContent=t; return d.innerHTML; }
+
+function listen(){
+  convUnsub = db.collection("conversations").orderBy("updatedAt","desc").limit(100)
+    .onSnapshot(function(snap){
+      var box = $("convs"); box.innerHTML = "";
+      snap.forEach(function(doc){
+        var c = doc.data();
+        var d = document.createElement("div");
+        d.className = "conv" + (activeConv===doc.id ? " active" : "");
+        var initials = (c.visitorName||"?").trim().split(/\s+/).map(function(w){return w[0];}).join("").slice(0,2).toUpperCase();
+        d.innerHTML =
+          '<div class="avatar">'+esc(initials)+'</div>'+
+          '<div class="conv_mid"><div class="conv_name">'+esc(c.visitorName||"Visitor")+'</div>'+
+          '<div class="conv_last">'+esc(c.lastMsg||"")+'</div></div>'+
+          '<div class="conv_right"><span class="conv_time">'+timeAgo(c.updatedAt)+'</span>'+
+          (c.unreadForAgent>0 ? '<span class="unread">'+c.unreadForAgent+'</span>' : '')+'</div>';
+        d.onclick = function(){ openConv(doc.id, c); };
+        box.appendChild(d);
+      });
+      if(!snap.size) box.innerHTML = '<div style="padding:24px;font-size:13.5px;color:#99a;text-align:center;">Abhi koi conversation nahi.<br>Widget wali site par test message bhejo.</div>';
+    });
+}
+
+function openConv(id, c){
+  activeConv = id;
+  document.body.classList.add("chat_open");
+  $("ch_name").textContent = c.visitorName || "Visitor";
+  $("ch_meta").textContent = (c.visitorEmail ? c.visitorEmail + " · " : "") + (c.page || "");
+  $("composer").classList.remove("hidden");
+  db.collection("conversations").doc(id).set({unreadForAgent: 0}, {merge:true});
+  document.querySelectorAll(".conv").forEach(function(el){ el.classList.remove("active"); });
+
+  if(msgUnsub) msgUnsub();
+  msgUnsub = db.collection("conversations").doc(id).collection("messages")
+    .orderBy("ts").limit(500)
+    .onSnapshot(function(snap){
+      var box = $("msgs"); box.innerHTML = "";
+      snap.forEach(function(doc){
+        var m = doc.data();
+        var d = document.createElement("div");
+        d.className = "m " + (m.from==="agent" ? "m_agent" : "m_visitor");
+        var t = m.ts ? m.ts.toDate().toLocaleTimeString([], {hour:"2-digit", minute:"2-digit"}) : "";
+        d.innerHTML = esc(m.text) + '<div class="m_time">'+t+'</div>';
+        box.appendChild(d);
+      });
+      box.scrollTop = box.scrollHeight;
+    });
+}
+
+$("send").onclick = sendReply;
+$("reply").addEventListener("keydown", function(e){ if(e.key==="Enter") sendReply(); });
+function sendReply(){
+  var t = $("reply").value.trim();
+  if(!t || !activeConv) return;
+  $("reply").value = "";
+  var ref = db.collection("conversations").doc(activeConv);
+  ref.collection("messages").add({from:"agent", text:t, ts:firebase.firestore.FieldValue.serverTimestamp()});
+  ref.set({lastMsg:"You: "+t.slice(0,110), updatedAt:firebase.firestore.FieldValue.serverTimestamp()}, {merge:true});
+}
+</script>
+</body>
+</html>
