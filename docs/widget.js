@@ -1,6 +1,5 @@
-/* HornetChat visitor widget — embed with:
-   <script src="https://YOURUSER.github.io/hornet-livechat/firebase-config.js"></script>
-   <script src="https://YOURUSER.github.io/hornet-livechat/widget.js"></script>
+/* HornetChat visitor widget v2
+   Naya: online presence, notification sound, same-email user = same conversation
 */
 (function () {
   var cfg = window.HORNET_FIREBASE_CONFIG;
@@ -13,7 +12,6 @@
   var COLOR = st.brandColor || "#057DE2";
   var SIDE = st.position === "left" ? "left" : "right";
 
-  // ---------- load Firebase SDKs ----------
   function loadScript(src) {
     return new Promise(function (res, rej) {
       var s = document.createElement("script");
@@ -30,20 +28,36 @@
     .then(init)
     .catch(function (e) { console.error("[HornetChat] SDK load failed", e); });
 
+  // notification beep (no audio file needed)
+  function beep() {
+    try {
+      var ctx = new (window.AudioContext || window.webkitAudioContext)();
+      var o = ctx.createOscillator(), g = ctx.createGain();
+      o.connect(g); g.connect(ctx.destination);
+      o.frequency.value = 880; g.gain.value = 0.08;
+      o.start(); o.stop(ctx.currentTime + 0.18);
+    } catch (e) {}
+  }
+
   function init() {
     if (!firebase.apps.length) firebase.initializeApp(cfg);
     var db = firebase.firestore();
     var auth = firebase.auth();
 
-    // ---------- visitor identity ----------
+    // ---- identity: email milta hai toh email-based ID (same user = same conversation, kisi bhi device se) ----
+    function emailId(em) {
+      return "e_" + em.toLowerCase().trim().replace(/[^a-z0-9]/g, "_").slice(0, 80);
+    }
     var vid = localStorage.getItem("hornet_vid");
     if (!vid) {
       vid = "v_" + Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
       localStorage.setItem("hornet_vid", vid);
     }
+    var savedEmail = localStorage.getItem("hornet_vemail") || "";
+    if (savedEmail) vid = emailId(savedEmail);
     var vname = localStorage.getItem("hornet_vname") || "";
 
-    // ---------- styles ----------
+    // ---- styles ----
     var css = document.createElement("style");
     css.textContent =
       "#hc-bubble{position:fixed;bottom:22px;" + SIDE + ":22px;width:58px;height:58px;border-radius:50%;background:" + COLOR + ";box-shadow:0 6px 24px rgba(0,0,0,.28);cursor:pointer;z-index:999999;display:flex;align-items:center;justify-content:center;transition:transform .15s;}" +
@@ -68,7 +82,6 @@
       "@media(max-width:480px){#hc-panel{bottom:0;" + SIDE + ":0;width:100vw;max-width:100vw;height:100vh;max-height:100vh;border-radius:0;}}";
     document.head.appendChild(css);
 
-    // ---------- DOM ----------
     var bubble = document.createElement("div");
     bubble.id = "hc-bubble";
     bubble.innerHTML =
@@ -84,14 +97,26 @@
     document.body.appendChild(panel);
     var body = panel.querySelector("#hc-body");
 
-    var open = false;
-    var unread = 0;
+    var open = false, unread = 0;
     var badge = bubble.querySelector("#hc-badge");
+    var baseTitle = document.title, titleTimer = null;
+
+    function flashTitle() {
+      if (titleTimer) return;
+      var on = false;
+      titleTimer = setInterval(function () {
+        document.title = on ? baseTitle : "💬 New message!";
+        on = !on;
+      }, 1200);
+    }
+    function stopFlash() {
+      if (titleTimer) { clearInterval(titleTimer); titleTimer = null; document.title = baseTitle; }
+    }
 
     bubble.onclick = function () {
       open = !open;
       panel.style.display = open ? "flex" : "none";
-      if (open) { unread = 0; badge.style.display = "none"; scrollDown(); }
+      if (open) { unread = 0; badge.style.display = "none"; stopFlash(); scrollDown(); }
     };
 
     function askName() {
@@ -99,7 +124,7 @@
         '<div id="hc-name-wrap">' +
         '<div style="font-size:14px;color:#444;line-height:1.5;">' + (st.welcomeMessage || "Hi! Apna naam batayein aur chat shuru karein.") + '</div>' +
         '<input id="hc-nm" placeholder="Aapka naam" maxlength="40"/>' +
-        '<input id="hc-em" placeholder="Email (optional)" maxlength="80"/>' +
+        '<input id="hc-em" placeholder="Email (same email = purani chat continue)" maxlength="80"/>' +
         '<button id="hc-go">Start chat</button></div>';
       body.querySelector("#hc-go").onclick = function () {
         var n = body.querySelector("#hc-nm").value.trim();
@@ -107,6 +132,10 @@
         vname = n;
         localStorage.setItem("hornet_vname", n);
         var em = body.querySelector("#hc-em").value.trim();
+        if (em) {
+          localStorage.setItem("hornet_vemail", em);
+          vid = emailId(em);
+        }
         startChat(em);
       };
     }
@@ -140,28 +169,45 @@
       scrollDown();
     }
 
-    var convRef, lastCount = 0;
+    var convRef, lastCount = -1, hb = null;
+    function heartbeat() {
+      if (!convRef) return;
+      convRef.set({ lastSeenVisitor: firebase.firestore.FieldValue.serverTimestamp() }, { merge: true });
+    }
+
     function startChat(email) {
       auth.signInAnonymously().then(function () {
         convRef = db.collection("conversations").doc(vid);
         convRef.set({
           visitorName: vname,
-          visitorEmail: email || "",
+          visitorEmail: email || localStorage.getItem("hornet_vemail") || "",
           page: location.href,
           updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
-          unreadForAgent: 0,
+          lastSeenVisitor: firebase.firestore.FieldValue.serverTimestamp(),
           status: "open"
         }, { merge: true });
         chatUI();
+
+        // presence heartbeat — har 30s, jab tak page khula hai
+        hb = setInterval(heartbeat, 30000);
+        document.addEventListener("visibilitychange", function () {
+          if (!document.hidden) heartbeat();
+        });
+
         convRef.collection("messages").orderBy("ts").limit(500)
           .onSnapshot(function (snap) {
             var msgs = [];
             snap.forEach(function (d) { msgs.push(d.data()); });
             render(msgs);
-            if (!open && msgs.length > lastCount && msgs.length && msgs[msgs.length - 1].from === "agent") {
-              unread += msgs.length - lastCount;
-              badge.textContent = unread;
-              badge.style.display = "block";
+            var last = msgs[msgs.length - 1];
+            if (lastCount >= 0 && msgs.length > lastCount && last && last.from === "agent") {
+              beep();
+              if (!open) {
+                unread += msgs.length - lastCount;
+                badge.textContent = unread;
+                badge.style.display = "block";
+                flashTitle();
+              }
             }
             lastCount = msgs.length;
           });
@@ -183,15 +229,13 @@
         lastMsg: t.slice(0, 120),
         visitorName: vname,
         updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+        lastSeenVisitor: firebase.firestore.FieldValue.serverTimestamp(),
         unreadForAgent: firebase.firestore.FieldValue.increment(1),
         status: "open"
       }, { merge: true });
     }
 
-    if (vname) {
-      startChat("");
-    } else {
-      askName();
-    }
+    if (vname) startChat("");
+    else askName();
   }
 })();
