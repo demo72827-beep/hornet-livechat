@@ -9,32 +9,48 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 <style>
-:root{--brand:#057DE2;--ink:#101E46;--bg:#F2F5F9;--line:#E3E8F0;}
+:root{--brand:#057DE2;--ink:#101E46;--bg:#F2F5F9;--line:#E3E8F0;--green:#1DB954;}
 *{margin:0;padding:0;box-sizing:border-box;}
 body{font-family:system-ui,-apple-system,'Segoe UI',sans-serif;background:var(--bg);height:100vh;overflow:hidden;}
 .hidden{display:none !important;}
 
-/* login */
-#login{height:100vh;display:flex;align-items:center;justify-content:center;background:var(--ink);}
-.login_card{background:#fff;border-radius:16px;padding:38px 34px;width:340px;box-shadow:0 16px 48px rgba(0,0,0,.3);}
-.login_card h1{font-size:20px;margin-bottom:4px;color:var(--ink);}
-.login_card p{font-size:13px;color:#667;margin-bottom:22px;}
-.login_card input{width:100%;padding:12px 14px;border:1.5px solid #ddd;border-radius:10px;font-size:14px;margin-bottom:12px;outline:none;}
-.login_card input:focus{border-color:var(--brand);}
-.login_card button{width:100%;padding:12px;background:var(--brand);color:#fff;border:none;border-radius:10px;font-size:15px;font-weight:600;cursor:pointer;}
-#login_err{color:#C0392B;font-size:12.5px;margin-top:10px;display:none;}
+/* ---- landing / auth ---- */
+#landing{height:100vh;overflow-y:auto;background:linear-gradient(160deg,var(--ink) 0%,#1a3a7a 100%);color:#fff;}
+.land_wrap{max-width:960px;margin:0 auto;padding:48px 24px;display:grid;grid-template-columns:1fr 380px;gap:48px;align-items:center;min-height:100vh;}
+.land_left h1{font-size:34px;line-height:1.2;margin-bottom:14px;}
+.land_left p{font-size:16px;opacity:.85;line-height:1.7;margin-bottom:22px;}
+.land_feats{display:flex;flex-direction:column;gap:12px;font-size:14.5px;}
+.land_feats div{display:flex;gap:10px;align-items:center;opacity:.92;}
+.auth_card{background:#fff;border-radius:18px;padding:30px 28px;color:#111;box-shadow:0 20px 60px rgba(0,0,0,.35);}
+.tabs{display:flex;gap:0;border:1.5px solid var(--line);border-radius:10px;overflow:hidden;margin-bottom:20px;}
+.tabs button{flex:1;padding:11px;border:none;background:#fff;font-size:14px;font-weight:600;cursor:pointer;color:#667;}
+.tabs button.on{background:var(--brand);color:#fff;}
+.auth_card input{width:100%;padding:12px 14px;border:1.5px solid #ddd;border-radius:10px;font-size:14px;margin-bottom:12px;outline:none;}
+.auth_card input:focus{border-color:var(--brand);}
+.auth_card .go{width:100%;padding:13px;background:var(--brand);color:#fff;border:none;border-radius:10px;font-size:15px;font-weight:600;cursor:pointer;}
+#auth_err{color:#C0392B;font-size:12.5px;margin-top:10px;display:none;line-height:1.5;}
+.hint{font-size:11.5px;color:#889;margin:-6px 0 12px;}
+@media(max-width:820px){.land_wrap{grid-template-columns:1fr;padding:32px 20px;}}
 
-/* app */
+/* ---- app ---- */
 #app{display:flex;height:100vh;}
-#sidebar{width:320px;background:#fff;border-right:1px solid var(--line);display:flex;flex-direction:column;flex-shrink:0;}
-#side_head{padding:16px 18px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;}
-#side_head b{font-size:16px;color:var(--ink);}
+#sidebar{width:340px;background:#fff;border-right:1px solid var(--line);display:flex;flex-direction:column;flex-shrink:0;}
+#side_head{padding:14px 18px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;}
+#side_head b{font-size:16px;color:var(--ink);display:block;}
+#side_head small{font-size:11.5px;color:#889;}
 #logout{font-size:12px;color:#889;cursor:pointer;background:none;border:none;}
+#stats{display:flex;gap:8px;padding:10px 18px;border-bottom:1px solid var(--line);}
+.stat{flex:1;background:var(--bg);border-radius:8px;padding:8px 10px;text-align:center;}
+.stat b{font-size:17px;color:var(--ink);display:block;}
+.stat span{font-size:10.5px;color:#788;text-transform:uppercase;letter-spacing:.04em;}
 #convs{flex:1;overflow-y:auto;}
-.conv{padding:14px 18px;border-bottom:1px solid var(--line);cursor:pointer;display:flex;gap:12px;align-items:center;}
+.conv{padding:13px 18px;border-bottom:1px solid var(--line);cursor:pointer;display:flex;gap:12px;align-items:center;}
 .conv:hover{background:#F7FAFD;}
 .conv.active{background:#EAF3FC;}
-.avatar{width:40px;height:40px;border-radius:50%;background:var(--brand);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:15px;flex-shrink:0;}
+.av_wrap{position:relative;flex-shrink:0;}
+.avatar{width:40px;height:40px;border-radius:50%;background:var(--brand);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:15px;}
+.pres{position:absolute;bottom:0;right:0;width:11px;height:11px;border-radius:50%;border:2px solid #fff;background:#B7BEC9;}
+.pres.on{background:var(--green);}
 .conv_mid{flex:1;min-width:0;}
 .conv_name{font-weight:600;font-size:14.5px;color:var(--ink);}
 .conv_last{font-size:12.5px;color:#788;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
@@ -43,9 +59,13 @@ body{font-family:system-ui,-apple-system,'Segoe UI',sans-serif;background:var(--
 .unread{background:#E24B4A;color:#fff;font-size:11px;font-weight:700;min-width:19px;height:19px;border-radius:10px;text-align:center;line-height:19px;padding:0 5px;}
 
 #main{flex:1;display:flex;flex-direction:column;min-width:0;}
-#chat_head{background:#fff;border-bottom:1px solid var(--line);padding:14px 22px;flex-shrink:0;}
-#chat_head b{font-size:15.5px;color:var(--ink);display:block;}
-#chat_head span{font-size:12px;color:#788;}
+#chat_head{background:#fff;border-bottom:1px solid var(--line);padding:12px 22px;flex-shrink:0;display:flex;align-items:center;gap:12px;}
+#back{display:none;background:none;border:none;font-size:18px;cursor:pointer;color:var(--ink);}
+#ch_name{font-size:15.5px;color:var(--ink);font-weight:600;}
+#ch_status{font-size:12px;}
+#ch_status .on{color:var(--green);font-weight:600;}
+#ch_status .off{color:#99a;}
+#ch_meta{font-size:11.5px;color:#889;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
 #msgs{flex:1;overflow-y:auto;padding:20px;display:flex;flex-direction:column;gap:8px;}
 .m{max-width:65%;padding:10px 14px;border-radius:14px;font-size:14px;line-height:1.45;white-space:pre-wrap;word-break:break-word;}
 .m_agent{align-self:flex-end;background:var(--brand);color:#fff;border-bottom-right-radius:4px;}
@@ -57,31 +77,66 @@ body{font-family:system-ui,-apple-system,'Segoe UI',sans-serif;background:var(--
 #send{width:44px;height:44px;border-radius:50%;border:none;background:var(--brand);color:#fff;font-size:16px;cursor:pointer;flex-shrink:0;}
 #empty{flex:1;display:flex;align-items:center;justify-content:center;color:#99a;font-size:14.5px;}
 @media(max-width:760px){#sidebar{width:100%;}#main{display:none;}
-body.chat_open #sidebar{display:none;}body.chat_open #main{display:flex;}}
-#back{display:none;background:none;border:none;font-size:18px;cursor:pointer;margin-right:10px;color:var(--ink);}
-@media(max-width:760px){#back{display:inline;}}
+body.chat_open #sidebar{display:none;}body.chat_open #main{display:flex;}#back{display:inline;}}
 </style>
 </head>
 <body>
 
-<div id="login">
-  <div class="login_card">
-    <h1>Agent login</h1>
-    <p>HornetChat dashboard — sirf team ke liye</p>
-    <input id="l_email" type="email" placeholder="Email" autocomplete="username">
-    <input id="l_pass" type="password" placeholder="Password" autocomplete="current-password">
-    <button id="l_btn">Sign in</button>
-    <div id="login_err"></div>
+<div id="landing">
+  <div class="land_wrap">
+    <div class="land_left">
+      <h1>HornetChat<br>Agent dashboard 💬</h1>
+      <p>Visament aur SaveTaxs ki websites se aane wale customer messages ka realtime inbox. Login karo ya team ka naya account banao.</p>
+      <div class="land_feats">
+        <div>🟢 &nbsp;Visitor online/offline live status</div>
+        <div>🔔 &nbsp;Naye message par sound + desktop notification</div>
+        <div>👤 &nbsp;Har visitor ki detail — naam, email, page, last seen</div>
+        <div>⚡ &nbsp;Realtime replies, zero refresh</div>
+      </div>
+    </div>
+    <div class="auth_card">
+      <div class="tabs">
+        <button id="t_login" class="on">Sign in</button>
+        <button id="t_signup">Create account</button>
+      </div>
+      <div id="f_signup" class="hidden">
+        <input id="s_name" placeholder="Aapka naam (e.g. Shubham)" maxlength="40">
+        <input id="s_email" type="email" placeholder="Email" autocomplete="email">
+        <input id="s_pass" type="password" placeholder="Password (min 6 characters)" autocomplete="new-password">
+        <input id="s_code" placeholder="Team invite code">
+        <div class="hint">Invite code firebase-config.js mein set hai — sirf team ko do</div>
+      </div>
+      <div id="f_login">
+        <input id="l_email" type="email" placeholder="Email" autocomplete="username">
+        <input id="l_pass" type="password" placeholder="Password" autocomplete="current-password">
+      </div>
+      <button class="go" id="auth_go">Sign in</button>
+      <div id="auth_err"></div>
+    </div>
   </div>
 </div>
 
 <div id="app" class="hidden">
   <div id="sidebar">
-    <div id="side_head"><b>Inbox</b><button id="logout">Logout</button></div>
+    <div id="side_head">
+      <div><b>Inbox</b><small id="me"></small></div>
+      <button id="logout">Logout</button>
+    </div>
+    <div id="stats">
+      <div class="stat"><b id="st_total">0</b><span>Total</span></div>
+      <div class="stat"><b id="st_online">0</b><span>Online</span></div>
+      <div class="stat"><b id="st_unread">0</b><span>Unread</span></div>
+    </div>
     <div id="convs"></div>
   </div>
   <div id="main">
-    <div id="chat_head"><div style="display:flex;align-items:center;"><button id="back">←</button><div><b id="ch_name">—</b><span id="ch_meta"></span></div></div></div>
+    <div id="chat_head">
+      <button id="back">←</button>
+      <div style="min-width:0;flex:1;">
+        <span id="ch_name">—</span> <span id="ch_status"></span>
+        <div id="ch_meta"></div>
+      </div>
+    </div>
     <div id="msgs"><div id="empty">Left se conversation select karo</div></div>
     <div id="composer" class="hidden">
       <input id="reply" placeholder="Reply likho…" maxlength="1000">
@@ -94,29 +149,83 @@ body.chat_open #sidebar{display:none;}body.chat_open #main{display:flex;}}
 firebase.initializeApp(window.HORNET_FIREBASE_CONFIG);
 var db = firebase.firestore();
 var auth = firebase.auth();
+var SETTINGS = window.HORNET_CHAT_SETTINGS || {};
+var INVITE = SETTINGS.agentInviteCode || "HORNET2026";
+var ONLINE_MS = 70000; // lastSeen < 70s = online
 
 var $ = function(id){ return document.getElementById(id); };
 var activeConv = null, msgUnsub = null, convUnsub = null;
+var mode = "login";
+var totalUnreadPrev = -1;
 
-auth.onAuthStateChanged(function(u){
-  var loggedIn = u && !u.isAnonymous;
-  $("login").classList.toggle("hidden", loggedIn);
-  $("app").classList.toggle("hidden", !loggedIn);
-  if (loggedIn) listen(); else { if(convUnsub) convUnsub(); if(msgUnsub) msgUnsub(); }
+function beep(){
+  try{
+    var ctx = new (window.AudioContext||window.webkitAudioContext)();
+    var o = ctx.createOscillator(), g = ctx.createGain();
+    o.connect(g); g.connect(ctx.destination);
+    o.frequency.value = 700; g.gain.value = 0.09;
+    o.start(); o.stop(ctx.currentTime + 0.2);
+  }catch(e){}
+}
+function notify(title, bodyTxt){
+  if(!("Notification" in window)) return;
+  if(Notification.permission === "granted"){
+    try{ new Notification(title, {body: bodyTxt}); }catch(e){}
+  }
+}
+
+/* ---- auth tabs ---- */
+$("t_login").onclick = function(){ setMode("login"); };
+$("t_signup").onclick = function(){ setMode("signup"); };
+function setMode(m){
+  mode = m;
+  $("t_login").classList.toggle("on", m==="login");
+  $("t_signup").classList.toggle("on", m==="signup");
+  $("f_login").classList.toggle("hidden", m!=="login");
+  $("f_signup").classList.toggle("hidden", m!=="signup");
+  $("auth_go").textContent = m==="login" ? "Sign in" : "Create account";
+  err("");
+}
+function err(t){
+  var el = $("auth_err");
+  el.textContent = t;
+  el.style.display = t ? "block" : "none";
+}
+
+$("auth_go").onclick = doAuth;
+document.addEventListener("keydown", function(e){
+  if(e.key==="Enter" && !$("landing").classList.contains("hidden")) doAuth();
 });
-
-$("l_btn").onclick = doLogin;
-$("l_pass").addEventListener("keydown", function(e){ if(e.key==="Enter") doLogin(); });
-function doLogin(){
-  auth.signInWithEmailAndPassword($("l_email").value.trim(), $("l_pass").value)
-    .catch(function(e){
-      var el = $("login_err");
-      el.textContent = "Login failed: " + e.message;
-      el.style.display = "block";
-    });
+function doAuth(){
+  err("");
+  if(mode === "login"){
+    auth.signInWithEmailAndPassword($("l_email").value.trim(), $("l_pass").value)
+      .catch(function(e){ err("Login failed: " + e.message); });
+  } else {
+    var name = $("s_name").value.trim();
+    var code = $("s_code").value.trim();
+    if(!name) return err("Naam daalo dost.");
+    if(code !== INVITE) return err("Invite code galat hai. Team admin se sahi code lo.");
+    auth.createUserWithEmailAndPassword($("s_email").value.trim(), $("s_pass").value)
+      .then(function(cred){ return cred.user.updateProfile({displayName: name}); })
+      .catch(function(e){ err("Signup failed: " + e.message); });
+  }
 }
 $("logout").onclick = function(){ auth.signOut(); location.reload(); };
 $("back").onclick = function(){ document.body.classList.remove("chat_open"); };
+
+auth.onAuthStateChanged(function(u){
+  var loggedIn = u && !u.isAnonymous;
+  $("landing").classList.toggle("hidden", loggedIn);
+  $("app").classList.toggle("hidden", !loggedIn);
+  if (loggedIn) {
+    $("me").textContent = u.displayName ? u.displayName + " · " + u.email : u.email;
+    if("Notification" in window && Notification.permission === "default"){
+      Notification.requestPermission();
+    }
+    listen();
+  } else { if(convUnsub) convUnsub(); if(msgUnsub) msgUnsub(); }
+});
 
 function timeAgo(ts){
   if(!ts) return "";
@@ -126,38 +235,61 @@ function timeAgo(ts){
   if(s<86400) return Math.floor(s/3600)+"h";
   return Math.floor(s/86400)+"d";
 }
+function isOnline(c){
+  return c.lastSeenVisitor && (Date.now() - c.lastSeenVisitor.toDate().getTime()) < ONLINE_MS;
+}
 function esc(t){ var d=document.createElement("div"); d.textContent=t; return d.innerHTML; }
 
 function listen(){
   convUnsub = db.collection("conversations").orderBy("updatedAt","desc").limit(100)
     .onSnapshot(function(snap){
       var box = $("convs"); box.innerHTML = "";
+      var total = 0, online = 0, unreadSum = 0;
       snap.forEach(function(doc){
         var c = doc.data();
+        total++;
+        var on = isOnline(c);
+        if(on) online++;
+        unreadSum += (c.unreadForAgent || 0);
         var d = document.createElement("div");
         d.className = "conv" + (activeConv===doc.id ? " active" : "");
         var initials = (c.visitorName||"?").trim().split(/\s+/).map(function(w){return w[0];}).join("").slice(0,2).toUpperCase();
         d.innerHTML =
-          '<div class="avatar">'+esc(initials)+'</div>'+
+          '<div class="av_wrap"><div class="avatar">'+esc(initials)+'</div><span class="pres'+(on?' on':'')+'"></span></div>'+
           '<div class="conv_mid"><div class="conv_name">'+esc(c.visitorName||"Visitor")+'</div>'+
           '<div class="conv_last">'+esc(c.lastMsg||"")+'</div></div>'+
           '<div class="conv_right"><span class="conv_time">'+timeAgo(c.updatedAt)+'</span>'+
-          (c.unreadForAgent>0 ? '<span class="unread">'+c.unreadForAgent+'</span>' : '')+'</div>';
+          ((c.unreadForAgent||0)>0 ? '<span class="unread">'+c.unreadForAgent+'</span>' : '')+'</div>';
         d.onclick = function(){ openConv(doc.id, c); };
         box.appendChild(d);
       });
+      $("st_total").textContent = total;
+      $("st_online").textContent = online;
+      $("st_unread").textContent = unreadSum;
+      if(totalUnreadPrev >= 0 && unreadSum > totalUnreadPrev){
+        beep();
+        notify("HornetChat — naya message", "Inbox mein " + unreadSum + " unread messages");
+      }
+      totalUnreadPrev = unreadSum;
       if(!snap.size) box.innerHTML = '<div style="padding:24px;font-size:13.5px;color:#99a;text-align:center;">Abhi koi conversation nahi.<br>Widget wali site par test message bhejo.</div>';
     });
+  // presence dots refresh (bina naye data ke bhi online→offline flip ho)
+  setInterval(function(){ if(convUnsub){} }, 30000);
 }
 
+var headTimer = null;
 function openConv(id, c){
   activeConv = id;
   document.body.classList.add("chat_open");
-  $("ch_name").textContent = c.visitorName || "Visitor";
-  $("ch_meta").textContent = (c.visitorEmail ? c.visitorEmail + " · " : "") + (c.page || "");
+  updateHead(c);
+  if(headTimer) clearInterval(headTimer);
+  headTimer = setInterval(function(){
+    db.collection("conversations").doc(id).get().then(function(doc){
+      if(doc.exists && activeConv === id) updateHead(doc.data());
+    });
+  }, 30000);
   $("composer").classList.remove("hidden");
   db.collection("conversations").doc(id).set({unreadForAgent: 0}, {merge:true});
-  document.querySelectorAll(".conv").forEach(function(el){ el.classList.remove("active"); });
 
   if(msgUnsub) msgUnsub();
   msgUnsub = db.collection("conversations").doc(id).collection("messages")
@@ -176,14 +308,29 @@ function openConv(id, c){
     });
 }
 
+function updateHead(c){
+  $("ch_name").textContent = c.visitorName || "Visitor";
+  var on = isOnline(c);
+  $("ch_status").innerHTML = on
+    ? '<span class="on">● online</span>'
+    : '<span class="off">○ last seen ' + (c.lastSeenVisitor ? timeAgo(c.lastSeenVisitor)+' ago' : 'unknown') + '</span>';
+  $("ch_meta").textContent = (c.visitorEmail ? c.visitorEmail + "  ·  " : "") + (c.page || "");
+}
+
 $("send").onclick = sendReply;
 $("reply").addEventListener("keydown", function(e){ if(e.key==="Enter") sendReply(); });
 function sendReply(){
   var t = $("reply").value.trim();
   if(!t || !activeConv) return;
   $("reply").value = "";
+  var u = auth.currentUser;
   var ref = db.collection("conversations").doc(activeConv);
-  ref.collection("messages").add({from:"agent", text:t, ts:firebase.firestore.FieldValue.serverTimestamp()});
+  ref.collection("messages").add({
+    from:"agent",
+    agentName: (u && u.displayName) || "",
+    text:t,
+    ts:firebase.firestore.FieldValue.serverTimestamp()
+  });
   ref.set({lastMsg:"You: "+t.slice(0,110), updatedAt:firebase.firestore.FieldValue.serverTimestamp()}, {merge:true});
 }
 </script>
