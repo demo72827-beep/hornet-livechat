@@ -2,29 +2,49 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // Agent = email/password login (non-anonymous)
-    function isAgent() {
+    // MASTER ADMIN — apna email yahan daalo (firebase-config.js wale se SAME)
+    function isSuper() {
+      return request.auth != null
+        && request.auth.token.email == 'masterpanel@gmail.com';
+    }
+    function isUser() {
       return request.auth != null
         && request.auth.token.firebase.sign_in_provider == 'password';
     }
-    // Visitor = anonymous login
     function isVisitor() {
       return request.auth != null
         && request.auth.token.firebase.sign_in_provider == 'anonymous';
     }
 
+    // Customer accounts
+    match /users/{uid} {
+      allow create, update: if isUser() && request.auth.uid == uid;
+      allow read: if isSuper() || (isUser() && request.auth.uid == uid);
+      allow delete: if false;
+    }
+
+    // Chat widgets (projects). Widget needs public "get" to load branding.
+    match /projects/{pid} {
+      allow get: if request.auth != null;
+      allow list: if isSuper() || (isUser() && resource.data.ownerUid == request.auth.uid);
+      allow create: if isUser() && request.resource.data.ownerUid == request.auth.uid;
+      allow update: if isSuper() || (isUser() && resource.data.ownerUid == request.auth.uid);
+      allow delete: if isSuper();
+    }
+
     match /conversations/{convId} {
-      // Agents sab conversations dekh/update kar sakte hain
-      allow read, write: if isAgent();
-      // Visitors apni conversation create/update kar sakte hain (read nahi list)
-      allow create, update: if isVisitor();
-      allow get: if isVisitor();
+      allow read: if isSuper()
+        || (isUser() && resource.data.ownerUid == request.auth.uid)
+        || isVisitor();
+      allow create, update: if isVisitor()
+        || isSuper()
+        || (isUser() && resource.data.ownerUid == request.auth.uid);
+      allow delete: if isSuper();
 
       match /messages/{msgId} {
-        allow read: if isAgent() || isVisitor();
-        allow create: if (isAgent() && request.resource.data.from == 'agent')
+        allow read: if isSuper() || isUser() || isVisitor();
+        allow create: if (isUser() && request.resource.data.from == 'agent')
                    || (isVisitor() && request.resource.data.from == 'visitor');
-        // Messages kabhi edit/delete nahi hote
         allow update, delete: if false;
       }
     }
