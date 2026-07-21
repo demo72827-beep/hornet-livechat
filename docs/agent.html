@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>HornetChat — Agent Dashboard</title>
+<title>HornetChat — Dashboard</title>
 <script src="./firebase-config.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
@@ -15,8 +15,10 @@ body{font-family:system-ui,-apple-system,'Segoe UI',sans-serif;background:var(--
 .hidden{display:none !important;}
 button{font-family:inherit;}
 svg{flex-shrink:0;}
+.btn{padding:10px 18px;border-radius:10px;border:none;background:var(--brand);color:#fff;font-size:14px;font-weight:600;cursor:pointer;}
+.btn_ghost{background:#fff;border:1.5px solid var(--line);color:var(--ink);}
 
-/* ---- landing ---- */
+/* landing */
 #landing{height:100vh;overflow-y:auto;background:linear-gradient(160deg,var(--ink) 0%,#1a3a7a 100%);color:#fff;}
 .land_wrap{max-width:980px;margin:0 auto;padding:48px 24px;display:grid;grid-template-columns:1fr 390px;gap:48px;align-items:center;min-height:100vh;}
 .land_left h1{font-size:34px;line-height:1.2;margin-bottom:14px;}
@@ -27,25 +29,53 @@ svg{flex-shrink:0;}
 .tabs{display:flex;border:1.5px solid var(--line);border-radius:10px;overflow:hidden;margin-bottom:20px;}
 .tabs button{flex:1;padding:11px;border:none;background:#fff;font-size:14px;font-weight:600;cursor:pointer;color:#667;}
 .tabs button.on{background:var(--brand);color:#fff;}
-.auth_card input,.auth_card select{width:100%;padding:12px 14px;border:1.5px solid #ddd;border-radius:10px;font-size:14px;margin-bottom:12px;outline:none;background:#fff;}
-.auth_card input:focus,.auth_card select:focus{border-color:var(--brand);}
+.auth_card input{width:100%;padding:12px 14px;border:1.5px solid #ddd;border-radius:10px;font-size:14px;margin-bottom:12px;outline:none;}
+.auth_card input:focus{border-color:var(--brand);}
 .auth_card .go{width:100%;padding:13px;background:var(--brand);color:#fff;border:none;border-radius:10px;font-size:15px;font-weight:600;cursor:pointer;}
 #auth_err{color:#C0392B;font-size:12.5px;margin-top:10px;display:none;line-height:1.5;}
-.hint{font-size:11.5px;color:#889;margin:-6px 0 12px;}
 @media(max-width:840px){.land_wrap{grid-template-columns:1fr;padding:32px 20px;}}
 
-/* ---- app shell ---- */
+/* shell */
 #app{display:flex;height:100vh;}
 #rail{width:64px;background:var(--ink);display:flex;flex-direction:column;align-items:center;padding:14px 0;gap:8px;flex-shrink:0;}
 .rail_btn{width:42px;height:42px;border-radius:12px;border:none;background:transparent;color:#8FA2C9;cursor:pointer;display:flex;align-items:center;justify-content:center;}
 .rail_btn.on{background:rgba(255,255,255,.14);color:#fff;}
 .rail_btn:hover{color:#fff;}
 #rail .spacer{flex:1;}
-#sidebar{width:340px;background:#fff;border-right:1px solid var(--line);display:flex;flex-direction:column;flex-shrink:0;}
+#content{flex:1;display:flex;min-width:0;}
+
+/* projects view */
+#projects_view{flex:1;overflow-y:auto;padding:28px;}
+.view_head{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;flex-wrap:wrap;gap:10px;}
+.view_head h2{font-size:21px;color:var(--ink);}
+.view_sub{font-size:13px;color:#788;margin-bottom:22px;}
+.proj_grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px;}
+.proj_card{background:#fff;border:1px solid var(--line);border-radius:14px;padding:20px;}
+.proj_top{display:flex;align-items:center;gap:12px;margin-bottom:12px;}
+.proj_dot{width:36px;height:36px;border-radius:10px;flex-shrink:0;display:flex;align-items:center;justify-content:center;}
+.proj_card h3{font-size:16px;color:var(--ink);}
+.proj_card small{font-size:12px;color:#889;display:block;}
+.proj_meta{font-size:12.5px;color:#788;margin-bottom:14px;}
+.proj_actions{display:flex;gap:8px;flex-wrap:wrap;}
+.proj_actions button{padding:8px 13px;font-size:12.5px;border-radius:8px;}
+.embed_box{margin-top:14px;background:#101E46;color:#CFE3FA;border-radius:10px;padding:13px;font-family:ui-monospace,monospace;font-size:11px;line-height:1.6;word-break:break-all;display:none;}
+.copy_ok{color:var(--green);font-size:12px;margin-top:6px;display:none;}
+
+/* modal */
+#modal{position:fixed;inset:0;background:rgba(16,30,70,.45);display:none;align-items:center;justify-content:center;z-index:100;padding:20px;}
+.modal_card{background:#fff;border-radius:16px;padding:26px;width:400px;max-width:100%;}
+.modal_card h3{font-size:17px;color:var(--ink);margin-bottom:16px;}
+.modal_card input{width:100%;padding:11px 13px;border:1.5px solid #ddd;border-radius:10px;font-size:14px;margin-bottom:12px;outline:none;}
+.color_row{display:flex;gap:8px;margin-bottom:16px;}
+.color_opt{width:32px;height:32px;border-radius:50%;cursor:pointer;border:3px solid transparent;}
+.color_opt.on{border-color:var(--ink);}
+
+/* inbox */
+#inbox_view{flex:1;display:none;min-width:0;}
+#sidebar{width:330px;background:#fff;border-right:1px solid var(--line);display:flex;flex-direction:column;flex-shrink:0;}
 #side_head{padding:13px 18px;border-bottom:1px solid var(--line);}
 #side_head b{font-size:16px;color:var(--ink);display:block;}
-#side_head small{font-size:11.5px;color:#889;}
-#site_filter{width:100%;margin-top:8px;padding:8px 10px;border:1.5px solid var(--line);border-radius:8px;font-size:13px;background:#fff;outline:none;}
+#proj_filter{width:100%;margin-top:8px;padding:8px 10px;border:1.5px solid var(--line);border-radius:8px;font-size:13px;background:#fff;outline:none;}
 #stats{display:flex;gap:8px;padding:10px 18px;border-bottom:1px solid var(--line);}
 .stat{flex:1;background:var(--bg);border-radius:8px;padding:8px 10px;text-align:center;}
 .stat b{font-size:17px;color:var(--ink);display:block;}
@@ -59,16 +89,13 @@ svg{flex-shrink:0;}
 .pres{position:absolute;bottom:0;right:0;width:11px;height:11px;border-radius:50%;border:2px solid #fff;background:#B7BEC9;}
 .pres.on{background:var(--green);}
 .conv_mid{flex:1;min-width:0;}
-.conv_name{font-weight:600;font-size:14.5px;color:var(--ink);display:flex;align-items:center;gap:7px;}
-.site_chip{font-size:9.5px;font-weight:700;padding:2px 7px;border-radius:99px;color:#fff;text-transform:uppercase;letter-spacing:.03em;}
+.conv_name{font-weight:600;font-size:14.5px;color:var(--ink);}
 .conv_last{font-size:12.5px;color:#788;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .conv_right{display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0;}
 .conv_time{font-size:11px;color:#99a;}
 .unread{background:#E24B4A;color:#fff;font-size:11px;font-weight:700;min-width:19px;height:19px;border-radius:10px;text-align:center;line-height:19px;padding:0 5px;}
-
-#main{flex:1;display:flex;flex-direction:column;min-width:0;}
-#chat_head{background:#fff;border-bottom:1px solid var(--line);padding:12px 22px;flex-shrink:0;display:flex;align-items:center;gap:12px;}
-#back{display:none;background:none;border:none;font-size:18px;cursor:pointer;color:var(--ink);}
+#chat_col{flex:1;display:flex;flex-direction:column;min-width:0;}
+#chat_head{background:#fff;border-bottom:1px solid var(--line);padding:12px 22px;flex-shrink:0;}
 #ch_name{font-size:15.5px;color:var(--ink);font-weight:600;}
 #ch_status .on{color:var(--green);font-weight:600;font-size:12px;}
 #ch_status .off{color:#99a;font-size:12px;}
@@ -83,31 +110,22 @@ svg{flex-shrink:0;}
 #composer{display:flex;gap:8px;padding:14px 20px;background:#fff;border-top:1px solid var(--line);flex-shrink:0;align-items:center;}
 #attach{width:40px;height:40px;border-radius:50%;border:none;background:var(--bg);cursor:pointer;display:flex;align-items:center;justify-content:center;}
 #reply{flex:1;border:1.5px solid #ddd;border-radius:22px;padding:11px 16px;font-size:14px;outline:none;min-width:0;}
-#reply:focus{border-color:var(--brand);}
 #send{width:44px;height:44px;border-radius:50%;border:none;background:var(--brand);cursor:pointer;display:flex;align-items:center;justify-content:center;}
 #empty{flex:1;display:flex;align-items:center;justify-content:center;color:#99a;font-size:14.5px;}
 
-/* ---- reports ---- */
-#reports{flex:1;overflow-y:auto;padding:26px;display:none;}
-#reports h2{font-size:20px;color:var(--ink);margin-bottom:4px;}
-#reports .sub{font-size:13px;color:#788;margin-bottom:20px;}
+/* admin */
+#admin_view{flex:1;overflow-y:auto;padding:28px;display:none;}
 .rep_grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:14px;margin-bottom:24px;}
 .rep_card{background:#fff;border:1px solid var(--line);border-radius:14px;padding:18px;}
 .rep_card b{font-size:26px;color:var(--ink);display:block;}
 .rep_card span{font-size:12px;color:#788;}
 .rep_panel{background:#fff;border:1px solid var(--line);border-radius:14px;padding:20px;margin-bottom:20px;}
 .rep_panel h3{font-size:14.5px;color:var(--ink);margin-bottom:14px;}
-.bar_row{display:flex;align-items:flex-end;gap:10px;height:130px;}
-.bar_col{flex:1;display:flex;flex-direction:column;align-items:center;gap:6px;justify-content:flex-end;height:100%;}
-.bar{width:100%;max-width:44px;background:var(--brand);border-radius:6px 6px 0 0;min-height:3px;}
-.bar_col small{font-size:10.5px;color:#889;}
-.bar_col b{font-size:11.5px;color:var(--ink);}
 table.rep_tbl{width:100%;border-collapse:collapse;font-size:13.5px;}
 .rep_tbl th{text-align:left;color:#788;font-size:11.5px;text-transform:uppercase;letter-spacing:.04em;padding:8px 10px;border-bottom:1px solid var(--line);}
 .rep_tbl td{padding:10px;border-bottom:1px solid var(--line);color:var(--ink);}
-
-@media(max-width:760px){#sidebar{width:calc(100% - 64px);}#main{display:none;}
-body.chat_open #sidebar{display:none;}body.chat_open #main{display:flex;}#back{display:inline;}}
+@media(max-width:760px){#sidebar{width:100%;}#chat_col{display:none;}
+body.chat_open #sidebar{display:none;}body.chat_open #chat_col{display:flex;}}
 </style>
 </head>
 <body>
@@ -115,14 +133,13 @@ body.chat_open #sidebar{display:none;}body.chat_open #main{display:flex;}#back{d
 <div id="landing">
   <div class="land_wrap">
     <div class="land_left">
-      <h1>HornetChat<br>Agent Dashboard</h1>
-      <p>A real-time customer chat inbox for all your websites. Sign in to your workspace, or create a new team account with your invite code.</p>
+      <h1>Add live chat to your website in 2 minutes</h1>
+      <p>Create your free account, make a chat widget, copy the embed code, and paste it on your website. Talk to your visitors in real time — free forever.</p>
       <div class="land_feats">
-        <div><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#7FD6A8" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M8.5 12.5l2.5 2.5 4.5-5"/></svg>Separate inbox for every website</div>
-        <div><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#7FD6A8" stroke-width="2"><circle cx="12" cy="12" r="4"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg>Live visitor online/offline status</div>
-        <div><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#7FD6A8" stroke-width="2"><path d="M18 8a6 6 0 00-12 0c0 7-3 9-3 9h18s-3-2-3-9M10.3 21a2 2 0 003.4 0"/></svg>Sound and desktop notifications</div>
-        <div><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#7FD6A8" stroke-width="2"><path d="M21 12.5l-8.2 8.2a5.5 5.5 0 01-7.8-7.8L13.5 4.4a3.7 3.7 0 015.2 5.2l-8.3 8.3a1.8 1.8 0 01-2.6-2.6l7.6-7.6"/></svg>File and image attachments</div>
-        <div><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#7FD6A8" stroke-width="2"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>Reports — chats, users and daily activity</div>
+        <div><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#7FD6A8" stroke-width="2"><path d="M8 12h13M8 6h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>Unlimited chat widgets, one per website</div>
+        <div><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#7FD6A8" stroke-width="2"><path d="M16 18l6-6-6-6M8 6l-6 6 6 6"/></svg>Simple copy-paste embed code</div>
+        <div><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#7FD6A8" stroke-width="2"><circle cx="12" cy="12" r="4"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg>Live visitor status and notifications</div>
+        <div><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#7FD6A8" stroke-width="2"><path d="M21 12.5l-8.2 8.2a5.5 5.5 0 01-7.8-7.8L13.5 4.4a3.7 3.7 0 015.2 5.2l-8.3 8.3a1.8 1.8 0 01-2.6-2.6l7.6-7.6"/></svg>File and image sharing</div>
       </div>
     </div>
     <div class="auth_card">
@@ -134,9 +151,6 @@ body.chat_open #sidebar{display:none;}body.chat_open #main{display:flex;}#back{d
         <input id="s_name" placeholder="Full name" maxlength="40">
         <input id="s_email" type="email" placeholder="Email" autocomplete="email">
         <input id="s_pass" type="password" placeholder="Password (minimum 6 characters)" autocomplete="new-password">
-        <select id="s_site"></select>
-        <input id="s_code" placeholder="Team invite code">
-        <div class="hint">Agents can access one website. Admins can access all websites and reports.</div>
       </div>
       <div id="f_login">
         <input id="l_email" type="email" placeholder="Email" autocomplete="username">
@@ -150,11 +164,14 @@ body.chat_open #sidebar{display:none;}body.chat_open #main{display:flex;}#back{d
 
 <div id="app" class="hidden">
   <div id="rail">
-    <button class="rail_btn on" id="nav_inbox" title="Inbox">
+    <button class="rail_btn on" id="nav_projects" title="My widgets">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
+    </button>
+    <button class="rail_btn" id="nav_inbox" title="Inbox">
       <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-6l-2 3h-4l-2-3H2"/><path d="M5.5 5.1L2 12v6a2 2 0 002 2h16a2 2 0 002-2v-6l-3.5-6.9A2 2 0 0016.7 4H7.3a2 2 0 00-1.8 1.1z"/></svg>
     </button>
-    <button class="rail_btn" id="nav_reports" title="Reports">
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>
+    <button class="rail_btn" id="nav_admin" title="Master admin" style="display:none;">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l7 4v6c0 4.4-3 8.5-7 10-4-1.5-7-5.6-7-10V6l7-4z"/><path d="M9.5 12l2 2 3.5-4"/></svg>
     </button>
     <div class="spacer"></div>
     <button class="rail_btn" id="logout" title="Sign out">
@@ -162,56 +179,84 @@ body.chat_open #sidebar{display:none;}body.chat_open #main{display:flex;}#back{d
     </button>
   </div>
 
-  <div id="sidebar">
-    <div id="side_head">
-      <b>Inbox</b><small id="me"></small>
-      <select id="site_filter" class="hidden"></select>
+  <div id="content">
+    <!-- PROJECTS -->
+    <div id="projects_view">
+      <div class="view_head">
+        <h2>My chat widgets</h2>
+        <button class="btn" id="new_proj">+ Create widget</button>
+      </div>
+      <div class="view_sub" id="me_line"></div>
+      <div class="proj_grid" id="proj_grid"></div>
     </div>
-    <div id="stats">
-      <div class="stat"><b id="st_total">0</b><span>Chats</span></div>
-      <div class="stat"><b id="st_online">0</b><span>Online</span></div>
-      <div class="stat"><b id="st_unread">0</b><span>Unread</span></div>
-    </div>
-    <div id="convs"></div>
-  </div>
 
-  <div id="main">
-    <div id="inbox_view" style="flex:1;display:flex;flex-direction:column;min-height:0;">
-      <div id="chat_head">
-        <button id="back">←</button>
-        <div style="min-width:0;flex:1;">
+    <!-- INBOX -->
+    <div id="inbox_view">
+      <div id="sidebar">
+        <div id="side_head">
+          <b>Inbox</b>
+          <select id="proj_filter"></select>
+        </div>
+        <div id="stats">
+          <div class="stat"><b id="st_total">0</b><span>Chats</span></div>
+          <div class="stat"><b id="st_online">0</b><span>Online</span></div>
+          <div class="stat"><b id="st_unread">0</b><span>Unread</span></div>
+        </div>
+        <div id="convs"></div>
+      </div>
+      <div id="chat_col">
+        <div id="chat_head">
           <span id="ch_name">—</span> <span id="ch_status"></span>
           <div id="ch_meta"></div>
         </div>
-      </div>
-      <div id="msgs"><div id="empty">Select a conversation from the left</div></div>
-      <div id="composer" class="hidden">
-        <button id="attach" title="Attach a file"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#667" stroke-width="1.8" stroke-linecap="round"><path d="M21 12.5l-8.2 8.2a5.5 5.5 0 01-7.8-7.8L13.5 4.4a3.7 3.7 0 015.2 5.2l-8.3 8.3a1.8 1.8 0 01-2.6-2.6l7.6-7.6"/></svg></button>
-        <input id="reply" placeholder="Type a reply…" maxlength="1000">
-        <button id="send" title="Send"><svg width="18" height="18" viewBox="0 0 24 24" fill="#fff"><path d="M3.4 20.4l17.4-7.5c.9-.4.9-1.6 0-2L3.4 3.4c-.8-.4-1.6.4-1.3 1.2L4.6 11c.1.3.4.5.7.5h6.2c.3 0 .3.5 0 .5H5.3c-.3 0-.6.2-.7.5l-2.5 6.6c-.3.9.5 1.7 1.3 1.3z"/></svg></button>
-        <input type="file" id="filepick" style="display:none">
+        <div id="msgs"><div id="empty">Select a conversation from the left</div></div>
+        <div id="composer" class="hidden">
+          <button id="attach" title="Attach a file"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#667" stroke-width="1.8" stroke-linecap="round"><path d="M21 12.5l-8.2 8.2a5.5 5.5 0 01-7.8-7.8L13.5 4.4a3.7 3.7 0 015.2 5.2l-8.3 8.3a1.8 1.8 0 01-2.6-2.6l7.6-7.6"/></svg></button>
+          <input id="reply" placeholder="Type a reply…" maxlength="1000">
+          <button id="send" title="Send"><svg width="18" height="18" viewBox="0 0 24 24" fill="#fff"><path d="M3.4 20.4l17.4-7.5c.9-.4.9-1.6 0-2L3.4 3.4c-.8-.4-1.6.4-1.3 1.2L4.6 11c.1.3.4.5.7.5h6.2c.3 0 .3.5 0 .5H5.3c-.3 0-.6.2-.7.5l-2.5 6.6c-.3.9.5 1.7 1.3 1.3z"/></svg></button>
+          <input type="file" id="filepick" style="display:none">
+        </div>
       </div>
     </div>
-    <div id="reports">
-      <h2>Reports</h2>
-      <div class="sub" id="rep_scope"></div>
+
+    <!-- MASTER ADMIN -->
+    <div id="admin_view">
+      <div class="view_head"><h2>Master admin</h2></div>
+      <div class="view_sub">Platform overview — all users, widgets and conversations</div>
       <div class="rep_grid">
-        <div class="rep_card"><b id="r_chats">0</b><span>Total conversations</span></div>
-        <div class="rep_card"><b id="r_msgs">0</b><span>Total messages</span></div>
-        <div class="rep_card"><b id="r_online">0</b><span>Visitors online now</span></div>
-        <div class="rep_card"><b id="r_unread">0</b><span>Unread messages</span></div>
+        <div class="rep_card"><b id="a_users">0</b><span>Registered users</span></div>
+        <div class="rep_card"><b id="a_projects">0</b><span>Widgets created</span></div>
+        <div class="rep_card"><b id="a_chats">0</b><span>Total conversations</span></div>
+        <div class="rep_card"><b id="a_msgs">0</b><span>Total messages</span></div>
       </div>
       <div class="rep_panel">
-        <h3>Active chats — last 7 days</h3>
-        <div class="bar_row" id="r_bars"></div>
-      </div>
-      <div class="rep_panel">
-        <h3>Websites</h3>
+        <h3>Users</h3>
         <table class="rep_tbl">
-          <thead><tr><th>Website</th><th>Chats</th><th>Online</th><th>Unread</th></tr></thead>
-          <tbody id="r_sites"></tbody>
+          <thead><tr><th>Name</th><th>Email</th><th>Joined</th><th>Widgets</th><th>Chats</th></tr></thead>
+          <tbody id="a_user_rows"></tbody>
         </table>
       </div>
+      <div class="rep_panel">
+        <h3>Widgets</h3>
+        <table class="rep_tbl">
+          <thead><tr><th>Widget</th><th>Owner</th><th>Created</th><th>Chats</th><th>Unread</th></tr></thead>
+          <tbody id="a_proj_rows"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- create widget modal -->
+<div id="modal">
+  <div class="modal_card">
+    <h3>Create a chat widget</h3>
+    <input id="m_name" placeholder="Website / brand name (e.g. My Store)" maxlength="50">
+    <input id="m_welcome" placeholder="Welcome message" maxlength="140" value="Hi! How can we help you today?">
+    <div class="color_row" id="m_colors"></div>
+    <div style="display:flex;gap:10px;justify-content:flex-end;">
+      <button class="btn btn_ghost" id="m_cancel">Cancel</button>
+      <button class="btn" id="m_create">Create widget</button>
     </div>
   </div>
 </div>
@@ -221,24 +266,23 @@ firebase.initializeApp(window.HORNET_FIREBASE_CONFIG);
 var db = firebase.firestore();
 var auth = firebase.auth();
 var S = window.HORNET_CHAT_SETTINGS || {};
-var SITES = S.sites || [{id:"default",label:"Default",color:"#057DE2"}];
-var AGENT_CODE = S.agentInviteCode || "HORNET2026";
-var ADMIN_CODE = S.adminInviteCode || "HORNETADMIN";
+var SUPER = (S.superAdminEmail || "").toLowerCase();
 var MAX_KB = S.maxFileKB || 700;
 var ONLINE_MS = 70000;
+var WIDGET_BASE = location.origin + location.pathname.replace(/agent\.html.*$/, "");
+var COLORS = ["#057DE2","#6A0DAD","#1DB954","#E8940A","#E24B4A","#101E46","#0FA3A3","#C2185B"];
 
 var $ = function(id){ return document.getElementById(id); };
-var mode = "login";
-var mySite = "all";           // "all" = admin
-var siteView = "all";         // current filter
-var activeConv = null, msgUnsub = null, convUnsub = null;
-var totalUnreadPrev = -1;
+var me = null, isSuper = false;
+var myProjects = [];      // {id, name, color, welcome, createdAt}
 var convCache = [];
+var projFilter = "all";
+var activeConv = null, msgUnsub = null, convUnsub = null, projUnsub = null;
+var totalUnreadPrev = -1;
+var mode = "login";
+var pickedColor = COLORS[0];
 
-function siteOf(id){
-  for(var i=0;i<SITES.length;i++) if(SITES[i].id===id) return SITES[i];
-  return {id:id||"?",label:id||"Unknown",color:"#788"};
-}
+function esc(t){ var d=document.createElement("div"); d.textContent=t||""; return d.innerHTML; }
 function beep(){
   try{
     var ctx = new (window.AudioContext||window.webkitAudioContext)();
@@ -249,12 +293,10 @@ function beep(){
   }catch(e){}
 }
 function notify(title, bodyTxt){
-  if(!("Notification" in window)) return;
-  if(Notification.permission === "granted"){
+  if("Notification" in window && Notification.permission === "granted"){
     try{ new Notification(title, {body: bodyTxt}); }catch(e){}
   }
 }
-function esc(t){ var d=document.createElement("div"); d.textContent=t||""; return d.innerHTML; }
 function timeAgo(ts){
   if(!ts) return "";
   var s = (Date.now() - ts.toDate().getTime())/1000;
@@ -263,15 +305,16 @@ function timeAgo(ts){
   if(s<86400) return Math.floor(s/3600)+"h";
   return Math.floor(s/86400)+"d";
 }
+function dstr(ts){ return ts ? ts.toDate().toLocaleDateString("en-IN",{day:"numeric",month:"short",year:"numeric"}) : "—"; }
 function isOnline(c){
   return c.lastSeenVisitor && (Date.now() - c.lastSeenVisitor.toDate().getTime()) < ONLINE_MS;
 }
+function projOf(id){
+  for(var i=0;i<myProjects.length;i++) if(myProjects[i].id===id) return myProjects[i];
+  return {id:id,name:"Widget",color:"#788"};
+}
 
-/* ---- auth ---- */
-var siteSel = $("s_site");
-siteSel.innerHTML = SITES.map(function(s){ return '<option value="'+s.id+'">'+esc(s.label)+' — agent</option>'; }).join("") +
-  '<option value="all">All websites — admin</option>';
-
+/* ---------- auth ---------- */
 $("t_login").onclick = function(){ setMode("login"); };
 $("t_signup").onclick = function(){ setMode("signup"); };
 function setMode(m){
@@ -280,7 +323,7 @@ function setMode(m){
   $("t_signup").classList.toggle("on", m==="signup");
   $("f_login").classList.toggle("hidden", m!=="login");
   $("f_signup").classList.toggle("hidden", m!=="signup");
-  $("auth_go").textContent = m==="login" ? "Sign in" : "Create account";
+  $("auth_go").textContent = m==="login" ? "Sign in" : "Create free account";
   err("");
 }
 function err(t){
@@ -299,16 +342,12 @@ function doAuth(){
       .catch(function(e){ err("Sign-in failed: " + e.message); });
   } else {
     var name = $("s_name").value.trim();
-    var site = siteSel.value;
-    var code = $("s_code").value.trim();
     if(!name) return err("Please enter your name.");
-    if(site === "all" && code !== ADMIN_CODE) return err("Invalid admin invite code.");
-    if(site !== "all" && code !== AGENT_CODE && code !== ADMIN_CODE) return err("Invalid invite code. Please ask your admin for the correct code.");
     auth.createUserWithEmailAndPassword($("s_email").value.trim(), $("s_pass").value)
       .then(function(cred){
-        return cred.user.updateProfile({displayName: name}).then(function(){
-          return db.collection("agents").doc(cred.user.uid).set({
-            name: name, email: cred.user.email, site: site,
+        return cred.user.updateProfile({displayName:name}).then(function(){
+          return db.collection("users").doc(cred.user.uid).set({
+            name:name, email:cred.user.email,
             createdAt: firebase.firestore.FieldValue.serverTimestamp()
           });
         });
@@ -317,86 +356,203 @@ function doAuth(){
   }
 }
 $("logout").onclick = function(){ auth.signOut(); location.reload(); };
-$("back").onclick = function(){ document.body.classList.remove("chat_open"); };
 
 auth.onAuthStateChanged(function(u){
   var loggedIn = u && !u.isAnonymous;
   $("landing").classList.toggle("hidden", loggedIn);
   $("app").classList.toggle("hidden", !loggedIn);
-  if (!loggedIn){ if(convUnsub) convUnsub(); if(msgUnsub) msgUnsub(); return; }
-  db.collection("agents").doc(u.uid).get().then(function(doc){
-    mySite = (doc.exists && doc.data().site) ? doc.data().site : "all";
-    siteView = mySite === "all" ? "all" : mySite;
-    var roleTxt = mySite === "all" ? "Admin · all websites" : "Agent · " + siteOf(mySite).label;
-    $("me").textContent = (u.displayName || u.email) + "  ·  " + roleTxt;
-    if(mySite === "all"){
-      var f = $("site_filter");
-      f.classList.remove("hidden");
-      f.innerHTML = '<option value="all">All websites</option>' +
-        SITES.map(function(s){ return '<option value="'+s.id+'">'+esc(s.label)+'</option>'; }).join("");
-      f.onchange = function(){ siteView = f.value; renderConvs(); };
-      $("nav_reports").style.display = "flex";
-    } else {
-      $("nav_reports").style.display = "none";
-    }
-    if("Notification" in window && Notification.permission === "default"){
-      Notification.requestPermission();
-    }
-    listen();
-  });
+  if(!loggedIn) return;
+  me = u;
+  isSuper = (u.email||"").toLowerCase() === SUPER && SUPER.indexOf("@") > 0;
+  $("me_line").textContent = (u.displayName || u.email) + (isSuper ? "  ·  Master admin" : "");
+  $("nav_admin").style.display = isSuper ? "flex" : "none";
+  // ensure users doc (old accounts)
+  db.collection("users").doc(u.uid).set({
+    name: u.displayName || "", email: u.email
+  }, {merge:true});
+  if("Notification" in window && Notification.permission === "default"){
+    Notification.requestPermission();
+  }
+  watchProjects();
+  watchConvs();
 });
 
-/* ---- nav ---- */
+/* ---------- nav ---------- */
+$("nav_projects").onclick = function(){ switchView("projects"); };
 $("nav_inbox").onclick = function(){ switchView("inbox"); };
-$("nav_reports").onclick = function(){ switchView("reports"); renderReports(); };
+$("nav_admin").onclick = function(){ switchView("admin"); renderAdmin(); };
 function switchView(v){
+  $("nav_projects").classList.toggle("on", v==="projects");
   $("nav_inbox").classList.toggle("on", v==="inbox");
-  $("nav_reports").classList.toggle("on", v==="reports");
+  $("nav_admin").classList.toggle("on", v==="admin");
+  $("projects_view").style.display = v==="projects" ? "block" : "none";
   $("inbox_view").style.display = v==="inbox" ? "flex" : "none";
-  $("reports").style.display = v==="reports" ? "block" : "none";
+  $("admin_view").style.display = v==="admin" ? "block" : "none";
 }
 
-/* ---- inbox ---- */
-function listen(){
-  if(convUnsub) convUnsub();
-  convUnsub = db.collection("conversations").orderBy("updatedAt","desc").limit(200)
+/* ---------- projects ---------- */
+function watchProjects(){
+  if(projUnsub) projUnsub();
+  projUnsub = db.collection("projects").where("ownerUid","==",me.uid)
     .onSnapshot(function(snap){
-      convCache = [];
+      myProjects = [];
       snap.forEach(function(doc){
-        var c = doc.data(); c._id = doc.id;
-        convCache.push(c);
+        var p = doc.data(); p.id = doc.id;
+        myProjects.push(p);
       });
+      myProjects.sort(function(a,b){
+        var ta = a.createdAt ? a.createdAt.toMillis() : 0;
+        var tb = b.createdAt ? b.createdAt.toMillis() : 0;
+        return tb - ta;
+      });
+      renderProjects();
+      renderProjFilter();
       renderConvs();
-      if($("reports").style.display === "block") renderReports();
     });
-  setInterval(renderConvs, 30000); // presence dots refresh
 }
 
-function visibleConvs(){
+function embedCode(pid){
+  return '&lt;script&gt;window.HORNET_PROJECT = "' + pid + '";&lt;/script&gt;\n' +
+         '&lt;script src="' + WIDGET_BASE + 'firebase-config.js"&gt;&lt;/script&gt;\n' +
+         '&lt;script src="' + WIDGET_BASE + 'widget.js"&gt;&lt;/script&gt;';
+}
+function embedPlain(pid){
+  return '<script>window.HORNET_PROJECT = "' + pid + '";<\/script>\n' +
+         '<script src="' + WIDGET_BASE + 'firebase-config.js"><\/script>\n' +
+         '<script src="' + WIDGET_BASE + 'widget.js"><\/script>';
+}
+
+function renderProjects(){
+  var g = $("proj_grid");
+  if(!myProjects.length){
+    g.innerHTML = '<div style="grid-column:1/-1;background:#fff;border:1.5px dashed var(--line);border-radius:14px;padding:40px;text-align:center;color:#788;font-size:14px;">No widgets yet.<br><br>Click <b>+ Create widget</b> to make your first chat widget, then paste the embed code on your website.</div>';
+    return;
+  }
+  g.innerHTML = "";
+  myProjects.forEach(function(p){
+    var chats = convCache.filter(function(c){ return c.projectId===p.id; }).length;
+    var d = document.createElement("div");
+    d.className = "proj_card";
+    d.innerHTML =
+      '<div class="proj_top"><div class="proj_dot" style="background:'+p.color+'"><svg width="18" height="18" viewBox="0 0 24 24" fill="#fff"><path d="M12 3C6.5 3 2 6.9 2 11.7c0 2.6 1.3 4.9 3.4 6.5-.2.9-.8 2.3-1.9 3.3 0 0 2.7-.3 4.7-1.6 1.2.4 2.5.6 3.8.6 5.5 0 10-3.9 10-8.8S17.5 3 12 3z"/></svg></div>'+
+      '<div><h3>'+esc(p.name)+'</h3><small>ID: '+p.id+'</small></div></div>'+
+      '<div class="proj_meta">Created '+dstr(p.createdAt)+' · '+chats+' conversation(s)</div>'+
+      '<div class="proj_actions">'+
+      '<button class="btn" data-act="embed">Embed code</button>'+
+      '<button class="btn btn_ghost" data-act="inbox">Open inbox</button>'+
+      '</div>'+
+      '<div class="embed_box"><pre style="white-space:pre-wrap;font-family:inherit;">'+embedCode(p.id)+'</pre></div>'+
+      '<div class="copy_ok">Copied to clipboard ✓</div>';
+    d.querySelector('[data-act="embed"]').onclick = function(){
+      var box = d.querySelector(".embed_box");
+      var shown = box.style.display === "block";
+      box.style.display = shown ? "none" : "block";
+      if(!shown){
+        navigator.clipboard.writeText(embedPlain(p.id)).then(function(){
+          var ok = d.querySelector(".copy_ok");
+          ok.style.display = "block";
+          setTimeout(function(){ ok.style.display = "none"; }, 2500);
+        }).catch(function(){});
+      }
+    };
+    d.querySelector('[data-act="inbox"]').onclick = function(){
+      projFilter = p.id;
+      $("proj_filter").value = p.id;
+      renderConvs();
+      switchView("inbox");
+    };
+    g.appendChild(d);
+  });
+}
+
+/* create modal */
+var colorsRow = $("m_colors");
+colorsRow.innerHTML = COLORS.map(function(c,i){
+  return '<div class="color_opt'+(i===0?' on':'')+'" style="background:'+c+'" data-c="'+c+'"></div>';
+}).join("");
+colorsRow.addEventListener("click", function(e){
+  var t = e.target.closest(".color_opt");
+  if(!t) return;
+  pickedColor = t.dataset.c;
+  colorsRow.querySelectorAll(".color_opt").forEach(function(el){ el.classList.remove("on"); });
+  t.classList.add("on");
+});
+$("new_proj").onclick = function(){ $("modal").style.display = "flex"; };
+$("m_cancel").onclick = function(){ $("modal").style.display = "none"; };
+$("m_create").onclick = function(){
+  var name = $("m_name").value.trim();
+  if(!name) return;
+  db.collection("projects").add({
+    ownerUid: me.uid,
+    ownerEmail: me.email,
+    name: name,
+    color: pickedColor,
+    welcome: $("m_welcome").value.trim() || "Hi! How can we help you today?",
+    position: "right",
+    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+  }).then(function(){
+    $("modal").style.display = "none";
+    $("m_name").value = "";
+  });
+};
+
+/* ---------- inbox ---------- */
+function watchConvs(){
+  if(convUnsub) convUnsub();
+  var q = isSuper
+    ? db.collection("conversations").limit(400)
+    : db.collection("conversations").where("ownerUid","==",me.uid).limit(400);
+  convUnsub = q.onSnapshot(function(snap){
+    convCache = [];
+    snap.forEach(function(doc){
+      var c = doc.data(); c._id = doc.id;
+      convCache.push(c);
+    });
+    convCache.sort(function(a,b){
+      var ta = a.updatedAt ? a.updatedAt.toMillis() : 0;
+      var tb = b.updatedAt ? b.updatedAt.toMillis() : 0;
+      return tb - ta;
+    });
+    renderConvs();
+    renderProjects();
+    if($("admin_view").style.display === "block") renderAdmin();
+  });
+  setInterval(renderConvs, 30000);
+}
+
+function renderProjFilter(){
+  var f = $("proj_filter");
+  f.innerHTML = '<option value="all">All widgets</option>' +
+    myProjects.map(function(p){ return '<option value="'+p.id+'">'+esc(p.name)+'</option>'; }).join("");
+  f.value = projFilter;
+  f.onchange = function(){ projFilter = f.value; renderConvs(); };
+}
+
+function myConvs(){
   return convCache.filter(function(c){
-    if(mySite !== "all" && c.site !== mySite) return false;
-    if(mySite === "all" && siteView !== "all" && c.site !== siteView) return false;
+    if(!isSuper && c.ownerUid !== me.uid) return false;
+    if(isSuper && c.ownerUid !== me.uid && projFilter === "all") return true;
+    if(projFilter !== "all" && c.projectId !== projFilter) return false;
     return true;
   });
 }
 
 function renderConvs(){
-  var list = visibleConvs();
+  var list = myConvs();
   var box = $("convs"); box.innerHTML = "";
   var online = 0, unreadSum = 0;
   list.forEach(function(c){
     var on = isOnline(c);
     if(on) online++;
     unreadSum += (c.unreadForAgent || 0);
-    var sp = siteOf(c.site);
+    var p = projOf(c.projectId);
     var d = document.createElement("div");
     d.className = "conv" + (activeConv===c._id ? " active" : "");
     var initials = (c.visitorName||"?").trim().split(/\s+/).map(function(w){return w[0];}).join("").slice(0,2).toUpperCase();
     d.innerHTML =
-      '<div class="av_wrap"><div class="avatar" style="background:'+sp.color+'">'+esc(initials)+'</div><span class="pres'+(on?' on':'')+'"></span></div>'+
-      '<div class="conv_mid"><div class="conv_name">'+esc(c.visitorName||"Visitor")+
-      (mySite==="all" && siteView==="all" ? '<span class="site_chip" style="background:'+sp.color+'">'+esc(sp.label)+'</span>' : '')+
-      '</div><div class="conv_last">'+esc(c.lastMsg||"")+'</div></div>'+
+      '<div class="av_wrap"><div class="avatar" style="background:'+(p.color||"#057DE2")+'">'+esc(initials)+'</div><span class="pres'+(on?' on':'')+'"></span></div>'+
+      '<div class="conv_mid"><div class="conv_name">'+esc(c.visitorName||"Visitor")+'</div>'+
+      '<div class="conv_last">'+esc(c.lastMsg||"")+'</div></div>'+
       '<div class="conv_right"><span class="conv_time">'+timeAgo(c.updatedAt)+'</span>'+
       ((c.unreadForAgent||0)>0 ? '<span class="unread">'+c.unreadForAgent+'</span>' : '')+'</div>';
     d.onclick = function(){ openConv(c._id, c); };
@@ -410,7 +566,7 @@ function renderConvs(){
     notify("HornetChat — new message", unreadSum + " unread message(s) in your inbox");
   }
   totalUnreadPrev = unreadSum;
-  if(!list.length) box.innerHTML = '<div style="padding:24px;font-size:13.5px;color:#99a;text-align:center;">No conversations yet.<br>Send a test message from your website widget.</div>';
+  if(!list.length) box.innerHTML = '<div style="padding:24px;font-size:13.5px;color:#99a;text-align:center;">No conversations yet.<br>Install your widget and send a test message.</div>';
 }
 
 var headTimer = null;
@@ -468,10 +624,9 @@ function updateHead(c){
   $("ch_status").innerHTML = on
     ? '<span class="on">● online</span>'
     : '<span class="off">○ last seen ' + (c.lastSeenVisitor ? timeAgo(c.lastSeenVisitor)+' ago' : 'unknown') + '</span>';
-  $("ch_meta").textContent = siteOf(c.site).label + "  ·  " + (c.visitorEmail ? c.visitorEmail + "  ·  " : "") + (c.page || "");
+  $("ch_meta").textContent = projOf(c.projectId).name + "  ·  " + (c.visitorEmail ? c.visitorEmail + "  ·  " : "") + (c.page || "");
 }
 
-/* ---- composer ---- */
 $("send").onclick = sendText;
 $("reply").addEventListener("keydown", function(e){ if(e.key==="Enter") sendText(); });
 $("attach").onclick = function(){ $("filepick").click(); };
@@ -488,9 +643,8 @@ function sendText(){
   var t = $("reply").value.trim();
   if(!t || !activeConv) return;
   $("reply").value = "";
-  var u = auth.currentUser;
   db.collection("conversations").doc(activeConv).collection("messages").add({
-    from:"agent", agentName:(u && u.displayName)||"", text:t,
+    from:"agent", agentName: me.displayName || "", text:t,
     ts:firebase.firestore.FieldValue.serverTimestamp()
   });
   convTouch(t);
@@ -500,11 +654,10 @@ function sendFile(){
   $("filepick").value = "";
   if(!f || !activeConv) return;
   if(f.size > MAX_KB*1024){ alert("File too large. Maximum size is "+MAX_KB+" KB."); return; }
-  var u = auth.currentUser;
   var r = new FileReader();
   r.onload = function(){
     db.collection("conversations").doc(activeConv).collection("messages").add({
-      from:"agent", agentName:(u && u.displayName)||"", text:"",
+      from:"agent", agentName: me.displayName || "", text:"",
       file:{name:f.name.slice(0,120), type:f.type||"application/octet-stream", data:r.result},
       ts:firebase.firestore.FieldValue.serverTimestamp()
     });
@@ -513,43 +666,52 @@ function sendFile(){
   r.readAsDataURL(f);
 }
 
-/* ---- reports ---- */
-function renderReports(){
-  var list = convCache; // admin only
-  $("rep_scope").textContent = "All websites · based on the latest " + list.length + " conversations";
-  var msgs = 0, online = 0, unread = 0;
-  var perSite = {};
-  var days = [];
-  for(var i=6;i>=0;i--){
-    var d = new Date(); d.setDate(d.getDate()-i); d.setHours(0,0,0,0);
-    days.push({t:d.getTime(), label:d.toLocaleDateString("en-IN",{weekday:"short"}), n:0});
-  }
-  list.forEach(function(c){
-    msgs += (c.msgCount||0);
-    if(isOnline(c)) online++;
-    unread += (c.unreadForAgent||0);
-    var k = c.site || "?";
-    if(!perSite[k]) perSite[k] = {chats:0, online:0, unread:0};
-    perSite[k].chats++;
-    if(isOnline(c)) perSite[k].online++;
-    perSite[k].unread += (c.unreadForAgent||0);
-    if(c.updatedAt){
-      var t = c.updatedAt.toDate(); t = new Date(t.getFullYear(),t.getMonth(),t.getDate()).getTime();
-      for(var j=0;j<days.length;j++) if(days[j].t===t) days[j].n++;
-    }
+/* ---------- master admin ---------- */
+function renderAdmin(){
+  if(!isSuper) return;
+  Promise.all([
+    db.collection("users").get(),
+    db.collection("projects").get()
+  ]).then(function(res){
+    var users = [], projects = [];
+    res[0].forEach(function(d){ var u=d.data(); u.id=d.id; users.push(u); });
+    res[1].forEach(function(d){ var p=d.data(); p.id=d.id; projects.push(p); });
+
+    var msgs = 0;
+    convCache.forEach(function(c){ msgs += (c.msgCount||0); });
+    $("a_users").textContent = users.length;
+    $("a_projects").textContent = projects.length;
+    $("a_chats").textContent = convCache.length;
+    $("a_msgs").textContent = msgs;
+
+    var projByOwner = {}, chatsByProj = {}, chatsByOwner = {}, unreadByProj = {};
+    projects.forEach(function(p){
+      projByOwner[p.ownerUid] = (projByOwner[p.ownerUid]||0)+1;
+    });
+    convCache.forEach(function(c){
+      chatsByProj[c.projectId] = (chatsByProj[c.projectId]||0)+1;
+      chatsByOwner[c.ownerUid] = (chatsByOwner[c.ownerUid]||0)+1;
+      unreadByProj[c.projectId] = (unreadByProj[c.projectId]||0)+(c.unreadForAgent||0);
+    });
+
+    users.sort(function(a,b){
+      var ta = a.createdAt ? a.createdAt.toMillis() : 0;
+      var tb = b.createdAt ? b.createdAt.toMillis() : 0;
+      return tb - ta;
+    });
+    $("a_user_rows").innerHTML = users.map(function(u){
+      return '<tr><td>'+esc(u.name||"—")+'</td><td>'+esc(u.email||"—")+'</td><td>'+dstr(u.createdAt)+'</td><td>'+(projByOwner[u.id]||0)+'</td><td>'+(chatsByOwner[u.id]||0)+'</td></tr>';
+    }).join("") || '<tr><td colspan="5" style="color:#99a;">No users yet</td></tr>';
+
+    projects.sort(function(a,b){
+      var ta = a.createdAt ? a.createdAt.toMillis() : 0;
+      var tb = b.createdAt ? b.createdAt.toMillis() : 0;
+      return tb - ta;
+    });
+    $("a_proj_rows").innerHTML = projects.map(function(p){
+      return '<tr><td><span style="display:inline-block;width:10px;height:10px;border-radius:3px;background:'+(p.color||"#788")+';margin-right:7px;"></span>'+esc(p.name)+'</td><td>'+esc(p.ownerEmail||"—")+'</td><td>'+dstr(p.createdAt)+'</td><td>'+(chatsByProj[p.id]||0)+'</td><td>'+(unreadByProj[p.id]||0)+'</td></tr>';
+    }).join("") || '<tr><td colspan="5" style="color:#99a;">No widgets yet</td></tr>';
   });
-  $("r_chats").textContent = list.length;
-  $("r_msgs").textContent = msgs;
-  $("r_online").textContent = online;
-  $("r_unread").textContent = unread;
-  var max = Math.max.apply(null, days.map(function(d){return d.n;}).concat([1]));
-  $("r_bars").innerHTML = days.map(function(d){
-    return '<div class="bar_col"><b>'+d.n+'</b><div class="bar" style="height:'+Math.round(d.n/max*100)+'%"></div><small>'+d.label+'</small></div>';
-  }).join("");
-  $("r_sites").innerHTML = Object.keys(perSite).map(function(k){
-    var sp = siteOf(k), v = perSite[k];
-    return '<tr><td><span class="site_chip" style="background:'+sp.color+'">'+esc(sp.label)+'</span></td><td>'+v.chats+'</td><td>'+v.online+'</td><td>'+v.unread+'</td></tr>';
-  }).join("") || '<tr><td colspan="4" style="color:#99a;">No data yet</td></tr>';
 }
 </script>
 </body>

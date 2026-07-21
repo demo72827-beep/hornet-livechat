@@ -1,5 +1,5 @@
 // ============================================================
-// HornetChat v3 — Firebase config (hornet-livechat project)
+// HornetChat SaaS — Firebase config
 // ============================================================
 window.HORNET_FIREBASE_CONFIG = {
   apiKey: "AIzaSyDlsgkbk9H625uJaiRGS6c942PIA5W_-94",
@@ -11,22 +11,9 @@ window.HORNET_FIREBASE_CONFIG = {
 };
 
 window.HORNET_CHAT_SETTINGS = {
-  // ---- Websites (CRM sites) ----
-  // Har website ka ek id + label + brand color.
-  // Widget embed karte waqt: <script>window.HORNET_SITE="visament"</script> widget.js se PEHLE.
-  sites: [
-    { id: "visament", label: "Visament", color: "#057DE2" },
-    { id: "savetaxs", label: "SaveTaxs", color: "#6A0DAD" }
-  ],
-  defaultSite: "visament",
-
-  brandName: "Visament Support",          // widget header (site color auto-lagega)
-  welcomeMessage: "Hi! 👋 How can we help you today? Type your question and we'll reply shortly.",
-  position: "right",
-
-  // ---- Invite codes (BADAL DO, sirf team ko do) ----
-  agentInviteCode: "HORNET2026",   // normal agent — sirf apni site ka inbox
-  adminInviteCode: "HORNETADMIN",  // admin — saari sites + Reports
-
-  maxFileKB: 700                    // attachment size limit (Firestore free plan ke liye)
+  productName: "HornetChat",
+  // MASTER ADMIN — apna email daalo (wahi jo aapke Firebase agent account ka hai).
+  // Yahi email firestore.rules mein bhi daalna hai (dono jagah SAME hona chahiye).
+  superAdminEmail: "masterpanel@gmail.com",
+  maxFileKB: 700
 };
